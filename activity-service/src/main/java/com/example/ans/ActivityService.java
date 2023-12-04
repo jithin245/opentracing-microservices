@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @SpringBootApplication
@@ -58,12 +59,28 @@ class ActivityResource {
 
     @PostMapping(path = "/random")
     public String name(@RequestHeader HttpHeaders headers, @RequestBody  ActivityPayload activityPayload) throws JsonProcessingException {
-        this.tracer.buildSpan("Activity received from lead service  " + new ObjectMapper().writeValueAsString(activityPayload)).start().finish();
+        Span span = this.tracer.buildSpan("Activity received from lead service  " + new ObjectMapper().writeValueAsString(activityPayload))
+                .start();
+        span.finish();
 
-        activityPayload.setUberTraceId(headers.getOrEmpty("uber-trace-id").stream().findFirst().orElse(""));
+        String uberTraceId = headers.getOrEmpty("uber-trace-id").stream().findFirst().orElse("");
+        System.out.println("parent trace id " + uberTraceId);
+        String[] parts = uberTraceId.split(":");
+        parts[1] = span.context().toSpanId();
+        parts[2] = generateRandomSpanId();
+        String childTraceId = String.join(":", parts);
+        activityPayload.setUberTraceId(childTraceId);
         kafkaProducer.sendMessage(new ObjectMapper().writeValueAsString(activityPayload));
         String name = activityNames.get(random.nextInt(activityNames.size()));
+
         return name;
     }
+
+    private String generateRandomSpanId() {
+        UUID randomUuid = UUID.randomUUID();
+        long leastSigBits = randomUuid.getLeastSignificantBits();
+        return String.format("%016x", leastSigBits);
+    }
+
 }
 

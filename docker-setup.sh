@@ -13,24 +13,24 @@ cd ../lead-service
 docker build -t com.example/lead-service:0.1.0 .
 echo "Built lead-service docker image..."
 
+echo "Building ssi-service docker image..."
+cd ../ssi-service
+./mvnw clean install
+docker build -t com.example/ssi-service:0.1.0 .
+echo "Built ssi-service docker image..."
+
+echo "Building streaming-receiver-service docker image..."
+cd ../streaming-receiver-service
+./mvnw clean install
+docker build -t com.example/streaming-receiver-service:0.1.0 .
+echo "Built streaming-receiver-service docker image..."
+
+
 echo "Building solr-service docker image..."
 cd ../solr-service
-./mvnw clean install
+sbt compile
 docker build -t com.example/solr-service:0.1.0 .
 echo "Built solr-service docker image..."
-
-echo "Building kafka-consumer-service docker image..."
-cd ../kafka-consumer-service
-./mvnw clean install
-docker build -t com.example/kafka-consumer-service:0.1.0 .
-echo "Built kafka-consumer-service docker image..."
-
-
-echo "Building scala-service docker image..."
-cd ../scala-service
-sbt compile
-docker build -t com.example/scala-service:0.1.0 .
-echo "Built scala-service docker image..."
 
 cd ../
 echo "Running docker-compose up..."

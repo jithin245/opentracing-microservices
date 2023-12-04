@@ -6,19 +6,19 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_APPLICATION_NAME=activity-service
-  scala-service:
-    image: com.example/scala-service:0.1.0
-    container_name: scala-service
-    hostname: scala-service
+  solr-service:
+    image: com.example/solr-service:0.1.0
+    container_name: solr-service
+    hostname: solr-service
     restart: on-failure
     ports:
       - "9000:9000" 
-  solr-service:
-    image: com.example/solr-service:0.1.0
+  ssi-service:
+    image: com.example/ssi-service:0.1.0
     restart: on-failure
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_APPLICATION_NAME=solr-service
+      - SPRING_APPLICATION_NAME=ssi-service
   lead-service:
     image: com.example/lead-service:0.1.0
     restart: on-failure
@@ -63,16 +63,17 @@ services:
       KAFKA_ADVERTISED_HOST_NAME: broker
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:9092
       CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:2181
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: 'true'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
-  kafka-consumer-service:
-    image: com.example/kafka-consumer-service:0.1.0
+  streaming-receiver-service:
+    image: com.example/streaming-receiver-service:0.1.0
     restart: on-failure
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_APPLICATION_NAME=kafka-consumer-service
+      - SPRING_APPLICATION_NAME=streaming-receiver-service
     depends_on:
       - kafka
